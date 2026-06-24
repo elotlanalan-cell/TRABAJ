@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>No puedo hacer el trabajo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: #000;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, #1a0a2e 0%, #000 60%),
+                radial-gradient(ellipse at 80% 20%, #0a1a2e 0%, transparent 50%);
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 520px;
+    text-align: center;
+  }
+
+  .title {
+    font-size: clamp(1rem, 3vw, 1.2rem);
+    color: #666;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  #mainBtn {
+    background: transparent;
+    border: 1.5px solid #fff;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 18px 36px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  #mainBtn:hover {
+    background: #fff;
+    color: #000;
+  }
+
+  #reasonsSection {
+    display: none;
+    animation: fadeUp 0.5s ease;
+  }
+
+  .subtitle {
+    font-size: 1.15rem;
+    color: #aaa;
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .reasons-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .reason-btn {
+    background: #111;
+    border: 1px solid #333;
+    color: #ddd;
+    font-family: inherit;
+    font-size: 0.97rem;
+    padding: 16px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .reason-btn:hover {
+    border-color: #666;
+    background: #1a1a1a;
+    color: #fff;
+  }
+
+  .reason-btn .num {
+    color: #555;
+    font-size: 0.85rem;
+    min-width: 20px;
+    padding-top: 2px;
+  }
+
+  .reason-btn.special {
+    border-color: #7c3aed;
+    color: #c4b5fd;
+  }
+
+  .reason-btn.special:hover {
+    background: #1a0a3e;
+    border-color: #a78bfa;
+    color: #ede9fe;
+  }
+
+  .reason-btn.special .num {
+    color: #7c3aed;
+  }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal {
+    background: #0f0f0f;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    position: relative;
+  }
+
+  .modal h2 {
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+
+  .modal p {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+  }
+
+  .plans {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .plan {
+    border: 1.5px solid #333;
+    border-radius: 10px;
+    padding: 20px 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .plan:hover, .plan.selected {
+    border-color: #7c3aed;
+    background: #1a0a3e;
+  }
+
+  .plan .plan-label {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .plan .plan-price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .plan .plan-price span {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #aaa;
+  }
+
+  .plan .plan-note {
+    font-size: 0.78rem;
+    color: #666;
+    margin-top: 6px;
+  }
+
+  .plan.selected .plan-label,
+  .plan.selected .plan-note { color: #a78bfa; }
+
+  .pay-btn {
+    width: 100%;
+    background: #7c3aed;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .pay-btn:hover { background: #6d28d9; }
+
+  .close-modal {
+    position: absolute;
+    top: 14px; right: 18px;
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 1.3rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .close-modal:hover { color: #fff; }
+
+  .toast {
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #7c3aed;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    z-index: 20;
+    animation: fadeUp 0.4s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <p class="title">Aviso importante</p>
+
+  <div id="mainSection">
+    <button id="mainBtn" onclick="showReasons()">
+      No puedo hacer el trabajo por...
+    </button>
+  </div>
+
+  <div id="reasonsSection">
+    <p class="subtitle">No haré el trabajo ya que...</p>
+
+    <div class="reasons-grid">
+      <button class="reason-btn" onclick="showReason(this)">
+        <span class="num">01</span>
+        <span>Estoy haciendo la página para Jasso</span>
+      </button>
+      <button class="reason-btn" onclick="showReason(this)">
+        <span class="num">02</span>
+        <span>También ando haciendo la tarea de español</span>
+      </button>
+      <button class="reason-btn" onclick="showReason(this)">
+        <span class="num">03</span>
+        <span>Estoy haciendo páginas para despedirme de compañeros que quiero</span>
+      </button>
+      <button class="reason-btn" onclick="showReason(this)">
+        <span class="num">04</span>
+        <span>Estoy demasiado ocupado lol</span>
+      </button>
+      <button class="reason-btn special" onclick="openModal()">
+        <span class="num">05</span>
+        <span>Hay una alternativa... 👀</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="close-modal" onclick="closeModal()">✕</button>
+    <h2>¿Quieres que lo haga? 😏</h2>
+    <p>Elige tu plan de pago y lo considero</p>
+
+    <div class="plans">
+      <div class="plan" id="planSemana" onclick="selectPlan('semana')">
+        <div class="plan-label">Por semana</div>
+        <div class="plan-price">€9<span>/sem</span></div>
+        <div class="plan-note">Pago semanal</div>
+      </div>
+      <div class="plan" id="planMes" onclick="selectPlan('mes')">
+        <div class="plan-label">Por mes</div>
+        <div class="plan-price">€29<span>/mes</span></div>
+        <div class="plan-note">Ahorra un 20%</div>
+      </div>
+    </div>
+
+    <button class="pay-btn" onclick="fakePay()">Contratar plan 💳</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">jaja no, igual no hago el trabajo 😂</div>
+
+<script>
+  function showReasons() {
+    document.getElementById('mainSection').style.display = 'none';
+    const r = document.getElementById('reasonsSection');
+    r.style.display = 'block';
+  }
+
+  function showReason(btn) {
+    document.querySelectorAll('.reason-btn:not(.special)').forEach(b => {
+      b.style.borderColor = '';
+      b.style.background = '';
+      b.style.color = '';
+    });
+    btn.style.borderColor = '#fff';
+    btn.style.background = '#1a1a1a';
+    btn.style.color = '#fff';
+  }
+
+  let selectedPlan = null;
+
+  function selectPlan(plan) {
+    selectedPlan = plan;
+    document.getElementById('planSemana').classList.remove('selected');
+    document.getElementById('planMes').classList.remove('selected');
+    document.getElementById('plan' + (plan === 'semana' ? 'Semana' : 'Mes')).classList.add('selected');
+  }
+
+  function openModal() {
+    document.getElementById('modalOverlay').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+  }
+
+  function fakePay() {
+    closeModal();
+    const toast = document.getElementById('toast');
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3500);
+  }
+
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  });
+</script>
+
+</body>
+</html>
